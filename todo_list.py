@@ -1,9 +1,14 @@
 import streamlit as st
 from task import Task
+from jokes import generate_joke
 
 if 'task_list'not in st.session_state:
     st.session_state.task_list=[]
 task_list=st.session_state.task_list
+
+if "joke" not in st.session_state:
+    api_key=st.secrets["jokes_api"]["api_key"]
+    st.session_state.joke=generate_joke(api_key)
 
 def add_task(task_name:str):
     task_list.append(Task(task_name))
@@ -22,6 +27,8 @@ with st.sidebar:
     if st.button('add task', type='primary'):
         add_task(task)
 
+st.info(st.session_state.joke)
+
 total_tasks=len(task_list)
 completed_tasks=sum(1 for task in task_list if task.is_done)
 metric_display=f'{completed_tasks}/{total_tasks} done'
@@ -38,6 +45,7 @@ for idx, task in enumerate(task_list):
     elif not checked and task.is_done:
         mark_not_done(task)
         st.rerun()
-    if delete_col.button('delete',key=f'delete_{idx})'):
+    if delete_col.button('delete',key=f'delete{idx}'):
         delete_task(idx)
         st.rerun()
+        
